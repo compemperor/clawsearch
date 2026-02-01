@@ -6,8 +6,8 @@ No accounts, no tracking, no credit cards.
 """
 
 import os
+import json
 import hashlib
-import time
 from datetime import datetime
 from typing import Optional, List
 from urllib.parse import urlencode
@@ -21,9 +21,26 @@ from pydantic import BaseModel, Field
 SEARXNG_URL = os.getenv("SEARXNG_URL", "http://localhost:8888")
 API_KEYS = os.getenv("CLAWSEARCH_API_KEYS", "").split(",")  # Comma-separated, empty = no auth
 CACHE_TTL = int(os.getenv("CLAWSEARCH_CACHE_TTL", "300"))  # 5 minutes default
+REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 
-# Simple in-memory cache (use Redis in production)
-_cache: dict = {}
+# Redis client (lazy init)
+_redis = None
+
+def get_redis():
+    """Get Redis client, lazy initialization."""
+    global _redis
+    if _redis is None:
+        try:
+            import redis
+            _redis = redis.from_url(REDIS_URL, decode_responses=True)
+            _redis.ping()  # Test connection
+        except Exception as e:
+            print(f"Redis not available, using in-memory cache: {e}")
+            _redis = False  # Mark as unavailable
+    return _redis if _redis else None
+
+# Fallback in-memory cache
+_memory_cache: dict = {}
 
 
 app = FastAPI(
@@ -74,6 +91,7 @@ class HealthResponse(BaseModel):
     """Health check response."""
     status: str
     searxng: str
+    redis: str
     version: str
     timestamp: str
 
@@ -93,23 +111,45 @@ async def verify_api_key(x_api_key: Optional[str] = Header(None)):
 
 def cache_key(query: str, **params) -> str:
     """Generate cache key from query and params."""
-    key_str = f"{query}:{sorted(params.items())}"
+    key_str = f"clawsearch:{query}:{sorted(params.items())}"
     return hashlib.md5(key_str.encode()).hexdigest()
 
 
 def get_cached(key: str) -> Optional[dict]:
-    """Get from cache if not expired."""
-    if key in _cache:
-        data, ts = _cache[key]
-        if time.time() - ts < CACHE_TTL:
+    """Get from Redis cache, fallback to memory."""
+    redis = get_redis()
+    
+    if redis:
+        try:
+            data = redis.get(key)
+            if data:
+                return json.loads(data)
+        except Exception:
+            pass
+    
+    # Fallback to memory cache
+    if key in _memory_cache:
+        data, exp = _memory_cache[key]
+        if datetime.now().timestamp() < exp:
             return data
-        del _cache[key]
+        del _memory_cache[key]
+    
     return None
 
 
 def set_cached(key: str, data: dict):
-    """Store in cache."""
-    _cache[key] = (data, time.time())
+    """Store in Redis cache, fallback to memory."""
+    redis = get_redis()
+    
+    if redis:
+        try:
+            redis.setex(key, CACHE_TTL, json.dumps(data, default=str))
+            return
+        except Exception:
+            pass
+    
+    # Fallback to memory cache
+    _memory_cache[key] = (data, datetime.now().timestamp() + CACHE_TTL)
 
 
 # ==================== SearXNG Client ====================
@@ -162,7 +202,9 @@ async def root():
 async def health_check():
     """Check API and SearXNG health."""
     searxng_status = "unknown"
+    redis_status = "unknown"
     
+    # Check SearXNG
     try:
         async with httpx.AsyncClient(timeout=5.0) as client:
             resp = await client.get(f"{SEARXNG_URL}/healthz")
@@ -170,9 +212,23 @@ async def health_check():
     except Exception:
         searxng_status = "unreachable"
     
+    # Check Redis
+    redis = get_redis()
+    if redis:
+        try:
+            redis.ping()
+            redis_status = "healthy"
+        except Exception:
+            redis_status = "degraded"
+    else:
+        redis_status = "disabled (using memory)"
+    
+    overall = "healthy" if searxng_status == "healthy" else "degraded"
+    
     return HealthResponse(
-        status="healthy" if searxng_status == "healthy" else "degraded",
+        status=overall,
         searxng=searxng_status,
+        redis=redis_status,
         version="0.1.0",
         timestamp=datetime.utcnow().isoformat() + "Z"
     )
@@ -215,7 +271,7 @@ async def search(
     
     response = {
         "query": q,
-        "results": results,
+        "results": [r.model_dump() for r in results],  # Convert to dicts for caching
         "total": data.get("number_of_results", len(results)),
         "cached": False,
         "timestamp": datetime.utcnow().isoformat() + "Z",
@@ -259,7 +315,7 @@ async def news_search(
     
     response = {
         "query": q,
-        "results": results,
+        "results": [r.model_dump() for r in results],
         "total": data.get("number_of_results", len(results)),
         "cached": False,
         "timestamp": datetime.utcnow().isoformat() + "Z",
@@ -302,7 +358,7 @@ async def tech_search(
     
     response = {
         "query": q,
-        "results": results,
+        "results": [r.model_dump() for r in results],
         "total": data.get("number_of_results", len(results)),
         "cached": False,
         "timestamp": datetime.utcnow().isoformat() + "Z",
