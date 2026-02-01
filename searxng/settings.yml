@@ -3,92 +3,43 @@
 use_default_settings: true
 
 general:
-  instance_name: "PrivateSearch"
+  instance_name: "ClawSearch"
   debug: false
   
+server:
+  secret_key: "96d460936e32067def69387631ebc8584a525e28ed627e9d895e4bf3fc2590f6"
+  limiter: false
+  image_proxy: true
+  method: "GET"
+  # Allow JSON format
+  allowed_formats:
+    - html
+    - json
+    - csv
+    - rss
+
 search:
   safe_search: 0
   autocomplete: "duckduckgo"
   default_lang: "en"
-  
-server:
-  # Allow JSON API access
-  limiter: false
-  image_proxy: true
-  method: "GET"
-  
+  formats:
+    - html
+    - json
+    - csv
+    - rss
+
 ui:
   static_use_hash: true
   default_theme: simple
-  
-# Redis caching (if redis container is running)
-redis:
-  url: redis://redis:6379/0
 
-# Outgoing requests
 outgoing:
   request_timeout: 5.0
   max_request_timeout: 15.0
-  useragent_suffix: ""
   pool_connections: 100
   pool_maxsize: 20
-
-# Engine settings - enable the good ones, disable problematic ones
-engines:
-  # Primary engines (reliable)
-  - name: duckduckgo
-    disabled: false
-    weight: 1.2
-    
-  - name: bing
-    disabled: false
-    weight: 1.0
-    
-  - name: google
-    disabled: false
-    weight: 1.5
-    
-  - name: startpage
-    disabled: false
-    weight: 1.0
-    
-  # News
-  - name: bing news
-    disabled: false
-    
-  - name: google news
-    disabled: false
-    
-  - name: duckduckgo news
-    disabled: false
-    
-  # Tech/IT
-  - name: github
-    disabled: false
-    
-  - name: stackoverflow
-    disabled: false
-    
-  - name: hackernews
-    disabled: false
-    
-  # Reference
-  - name: wikipedia
-    disabled: false
-    
-  - name: wikidata
-    disabled: false
-    
-  # Disable noisy/slow engines
-  - name: yahoo
-    disabled: true
-    
-  - name: qwant
-    disabled: true
-    
-  - name: mojeek
-    disabled: true
-
-# Rate limiting per client (disabled for local use)
-limiter:
-  enabled: false
+  
+# Disable bot detection for API use
+server:
+  secret_key: "96d460936e32067def69387631ebc8584a525e28ed627e9d895e4bf3fc2590f6"
+  limiter: false
+  

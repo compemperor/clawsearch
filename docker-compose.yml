@@ -1,7 +1,4 @@
-version: '3.8'
-
 services:
-  # ClawSearch API
   clawsearch:
     build: .
     container_name: clawsearch
@@ -10,7 +7,7 @@ services:
       - "8000:8000"
     environment:
       - SEARXNG_URL=http://searxng:8080
-      - CLAWSEARCH_API_KEYS=${CLAWSEARCH_API_KEYS:-}  # Empty = no auth
+      - CLAWSEARCH_API_KEYS=${CLAWSEARCH_API_KEYS:-}
       - CLAWSEARCH_CACHE_TTL=300
     depends_on:
       - searxng
@@ -20,13 +17,12 @@ services:
       timeout: 10s
       retries: 3
 
-  # SearXNG (meta-search backend)
   searxng:
     image: searxng/searxng:latest
     container_name: clawsearch-searxng
     restart: unless-stopped
     volumes:
-      - ./searxng/settings.yml:/etc/searxng/settings.yml:ro
+      - ./searxng/settings.yml:/etc/searxng/settings.yml
     environment:
       - SEARXNG_BASE_URL=http://localhost:8080/
     cap_drop:
@@ -35,12 +31,3 @@ services:
       - CHOWN
       - SETGID
       - SETUID
-
-  # Redis cache (optional, for production)
-  redis:
-    image: redis:alpine
-    container_name: clawsearch-redis
-    restart: unless-stopped
-    command: redis-server --save "" --appendonly no
-    profiles:
-      - production
