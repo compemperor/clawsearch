@@ -141,12 +141,14 @@ pip install -r requirements.txt
 SEARXNG_URL=http://localhost:8888 uvicorn clawsearch.main:app --host 0.0.0.0 --port 8000
 ```
 
-### Production
+### Architecture
 
-For production, add Redis caching:
+Redis caching is included by default for better performance.
 
-```bash
-docker compose --profile production up -d
+```
+ClawSearch API ─► SearXNG ─► [Google, Bing, DDG]
+      │              │
+      └──── Redis ◄──┘
 ```
 
 ## Customization

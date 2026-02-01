@@ -1,4 +1,5 @@
 services:
+  # ClawSearch API
   clawsearch:
     build: .
     container_name: clawsearch
@@ -9,14 +10,17 @@ services:
       - SEARXNG_URL=http://searxng:8080
       - CLAWSEARCH_API_KEYS=${CLAWSEARCH_API_KEYS:-}
       - CLAWSEARCH_CACHE_TTL=300
+      - REDIS_URL=redis://redis:6379/0
     depends_on:
       - searxng
+      - redis
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
 
+  # SearXNG (meta-search backend)
   searxng:
     image: searxng/searxng:latest
     container_name: clawsearch-searxng
@@ -25,9 +29,23 @@ services:
       - ./searxng/settings.yml:/etc/searxng/settings.yml
     environment:
       - SEARXNG_BASE_URL=http://localhost:8080/
+    depends_on:
+      - redis
     cap_drop:
       - ALL
     cap_add:
       - CHOWN
       - SETGID
       - SETUID
+
+  # Redis (caching for both ClawSearch and SearXNG)
+  redis:
+    image: redis:alpine
+    container_name: clawsearch-redis
+    restart: unless-stopped
+    command: redis-server --save "" --appendonly no --maxmemory 128mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3

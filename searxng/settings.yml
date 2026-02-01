@@ -5,18 +5,12 @@ use_default_settings: true
 general:
   instance_name: "ClawSearch"
   debug: false
-  
+
 server:
-  secret_key: "96d460936e32067def69387631ebc8584a525e28ed627e9d895e4bf3fc2590f6"
+  secret_key: "changeme-generate-your-own-secret-key-here"
   limiter: false
   image_proxy: true
   method: "GET"
-  # Allow JSON format
-  allowed_formats:
-    - html
-    - json
-    - csv
-    - rss
 
 search:
   safe_search: 0
@@ -32,14 +26,40 @@ ui:
   static_use_hash: true
   default_theme: simple
 
+# Redis caching
+redis:
+  url: redis://redis:6379/0
+
 outgoing:
   request_timeout: 5.0
   max_request_timeout: 15.0
   pool_connections: 100
   pool_maxsize: 20
-  
-# Disable bot detection for API use
-server:
-  secret_key: "96d460936e32067def69387631ebc8584a525e28ed627e9d895e4bf3fc2590f6"
-  limiter: false
-  
+
+engines:
+  - name: duckduckgo
+    disabled: false
+    
+  - name: bing
+    disabled: false
+    
+  - name: google
+    disabled: false
+    
+  - name: startpage
+    disabled: false
+    
+  - name: bing news
+    disabled: false
+    
+  - name: google news
+    disabled: false
+    
+  - name: github
+    disabled: false
+    
+  - name: hackernews
+    disabled: false
+    
+  - name: wikipedia
+    disabled: false
