@@ -4,6 +4,8 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
+[![Docker](https://img.shields.io/badge/docker-ghcr.io%2Fcompemperor%2Fclawsearch-blue)](https://github.com/compemperor/clawsearch/pkgs/container/clawsearch)
+[![Release](https://img.shields.io/github/v/release/compemperor/clawsearch)](https://github.com/compemperor/clawsearch/releases)
 
 ## Why ClawSearch?
 
@@ -17,11 +19,12 @@
 ## Quick Start
 
 ```bash
-# Clone
+# Option 1: Docker pull (recommended)
+docker pull ghcr.io/compemperor/clawsearch:latest
+
+# Option 2: Clone and build
 git clone https://github.com/compemperor/clawsearch.git
 cd clawsearch
-
-# Run (Docker)
 docker compose up -d
 
 # Test
