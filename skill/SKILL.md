@@ -11,7 +11,11 @@ metadata:
       - id: docker
         kind: shell
         command: "git clone https://github.com/compemperor/clawsearch && cd clawsearch && docker compose up -d"
-        label: "Deploy ClawSearch (Docker)"
+        label: "Deploy ClawSearch (Docker Compose)"
+      - id: docker-pull
+        kind: shell
+        command: "docker pull ghcr.io/compemperor/clawsearch:latest"
+        label: "Pull ClawSearch image"
 ---
 
 # ClawSearch Skill 🔍
@@ -20,13 +24,24 @@ Private meta-search API for AI agents.
 
 ## Quick Deploy
 
+**Option 1: Docker Compose (full stack)**
 ```bash
 git clone https://github.com/compemperor/clawsearch
 cd clawsearch
 docker compose up -d
 ```
 
+**Option 2: Docker Pull (image only)**
+```bash
+docker pull ghcr.io/compemperor/clawsearch:latest
+```
+
 API available at `http://localhost:8000`
+
+## Docker Images
+
+- `ghcr.io/compemperor/clawsearch:latest`
+- `ghcr.io/compemperor/clawsearch:1.0.0`
 
 ## Endpoints
 
@@ -92,4 +107,4 @@ curl "http://localhost:8000/tech?q=fastapi"
 
 ## Full Documentation
 
-See [AGENTS.md](../AGENTS.md) for detailed AI agent integration guide.
+https://github.com/compemperor/clawsearch
