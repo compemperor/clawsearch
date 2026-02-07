@@ -27,28 +27,22 @@ docker compose up -d
 
 # Test
 curl "http://localhost:8000/search?q=hello+world"
+
+# Add skill to OpenClaw
+cp -r skill ~/.openclaw/workspace/skills/clawsearch
 ```
 
 ### Option 2: Docker Pull
 
 ```bash
+# Pull the image
 docker pull ghcr.io/compemperor/clawsearch:latest
+
+# Add skill to OpenClaw
+mkdir -p ~/.openclaw/workspace/skills/clawsearch
+curl -sL https://raw.githubusercontent.com/compemperor/clawsearch/main/skill/SKILL.md \
+  -o ~/.openclaw/workspace/skills/clawsearch/SKILL.md
 ```
-
-### Option 3: OpenClaw Skill
-
-Add ClawSearch as an OpenClaw skill for AI agent integration:
-
-```bash
-# Clone skills repo (if not already)
-git clone https://github.com/compemperor/openclaw-skills.git ~/.openclaw/workspace/skills
-
-# Or add just the searxng skill
-cd ~/.openclaw/workspace/skills
-curl -sL https://raw.githubusercontent.com/compemperor/openclaw-skills/main/searxng/SKILL.md -o searxng/SKILL.md
-```
-
-The skill provides your AI agent with search capabilities via the ClawSearch API.
 
 ## API Endpoints
 
