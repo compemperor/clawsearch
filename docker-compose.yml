@@ -1,7 +1,8 @@
 services:
   # ClawSearch API
   clawsearch:
-    build: .
+    image: ghcr.io/compemperor/clawsearch:latest
+    # build: .  # Uncomment to build locally instead
     container_name: clawsearch
     restart: unless-stopped
     ports:

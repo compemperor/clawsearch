@@ -31,8 +31,8 @@ docker compose up -d
 ```bash
 mkdir clawsearch && cd clawsearch
 curl -sLO https://raw.githubusercontent.com/compemperor/clawsearch/main/docker-compose.yml
-curl -sLO https://raw.githubusercontent.com/compemperor/clawsearch/main/Dockerfile
-curl -sL https://raw.githubusercontent.com/compemperor/clawsearch/main/searxng/settings.yml -o searxng/settings.yml --create-dirs
+mkdir -p searxng
+curl -sL https://raw.githubusercontent.com/compemperor/clawsearch/main/searxng/settings.yml -o searxng/settings.yml
 docker compose up -d
 ```
 
