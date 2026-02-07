@@ -12,10 +12,6 @@ metadata:
         kind: shell
         command: "git clone https://github.com/compemperor/clawsearch && cd clawsearch && docker compose up -d"
         label: "Deploy ClawSearch (Docker Compose)"
-      - id: docker-pull
-        kind: shell
-        command: "docker pull ghcr.io/compemperor/clawsearch:latest"
-        label: "Pull ClawSearch image"
 ---
 
 # ClawSearch Skill 🔍
@@ -24,24 +20,25 @@ Private meta-search API for AI agents.
 
 ## Quick Deploy
 
-**Option 1: Docker Compose (full stack)**
+ClawSearch requires SearXNG + Redis. Use Docker Compose:
+
+**Option 1: Clone repo**
 ```bash
 git clone https://github.com/compemperor/clawsearch
 cd clawsearch
 docker compose up -d
 ```
 
-**Option 2: Docker Pull (image only)**
+**Option 2: Curl files**
 ```bash
-docker pull ghcr.io/compemperor/clawsearch:latest
+mkdir clawsearch && cd clawsearch
+curl -sLO https://raw.githubusercontent.com/compemperor/clawsearch/main/docker-compose.yml
+curl -sLO https://raw.githubusercontent.com/compemperor/clawsearch/main/Dockerfile
+curl -sL https://raw.githubusercontent.com/compemperor/clawsearch/main/searxng/settings.yml -o searxng/settings.yml --create-dirs
+docker compose up -d
 ```
 
 API available at `http://localhost:8000`
-
-## Docker Images
-
-- `ghcr.io/compemperor/clawsearch:latest`
-- `ghcr.io/compemperor/clawsearch:1.0.0`
 
 ## Endpoints
 

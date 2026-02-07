@@ -18,27 +18,31 @@
 
 ## Quick Start
 
-### Option 1: Docker Compose (Recommended)
+ClawSearch requires SearXNG + Redis. Use Docker Compose:
 
+**Option 1: Clone repo**
 ```bash
 git clone https://github.com/compemperor/clawsearch.git
 cd clawsearch
 docker compose up -d
-
-# Test
-curl "http://localhost:8000/search?q=hello+world"
-
-# Add skill to OpenClaw
-cp -r skill ~/.openclaw/workspace/skills/clawsearch
 ```
 
-### Option 2: Docker Pull
-
+**Option 2: Curl files directly**
 ```bash
-# Pull the image
-docker pull ghcr.io/compemperor/clawsearch:latest
+mkdir clawsearch && cd clawsearch
+curl -sLO https://raw.githubusercontent.com/compemperor/clawsearch/main/docker-compose.yml
+curl -sLO https://raw.githubusercontent.com/compemperor/clawsearch/main/Dockerfile
+curl -sL https://raw.githubusercontent.com/compemperor/clawsearch/main/searxng/settings.yml -o searxng/settings.yml --create-dirs
+docker compose up -d
+```
 
-# Add skill to OpenClaw
+**Test:**
+```bash
+curl "http://localhost:8000/search?q=hello+world"
+```
+
+**Add skill to OpenClaw:**
+```bash
 mkdir -p ~/.openclaw/workspace/skills/clawsearch
 curl -sL https://raw.githubusercontent.com/compemperor/clawsearch/main/skill/SKILL.md \
   -o ~/.openclaw/workspace/skills/clawsearch/SKILL.md
